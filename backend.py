@@ -179,7 +179,7 @@ def get_all_questions():
             continue  # Skip questions that are already paired
 
         prefq_number = question.get("prefq_number")
-        
+
         if prefq_number:
             # Find the corresponding preference question
             pref_question = next((q for q in questions if q["question_number"] == prefq_number), None)
@@ -196,7 +196,7 @@ def get_all_questions():
 
     return jsonify({"questions": grouped_questions}), 200
 
-@app.route("/api/matches", methods=["POST"])
+@app.route("/api/matches/<user_id>", methods=["POST"])
 def matches():
   data = request.get_json()
   user_id = data.get("user_id")
