@@ -1,8 +1,10 @@
+from bson import ObjectId
 from dotenv import load_dotenv
 import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from pymongo import MongoClient
+import numpy as np
 
 load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
@@ -21,7 +23,70 @@ questions_collection = db["Questions"]
 
 # Matchability functions
 
+# helper function for weight vector
+def get_weight_vector():
+  all_questions = questions_collection.find(
+      {"prefq_number": {"$ne": None}, "cleaning": {"$exists": False}},
+      {"possible_answers": 1, "question_number": 1}
+  )
+  all_questions = list(all_questions)
+  weight_vector = np.zeros(len(all_questions))
+  for i, question in enumerate(all_questions):
+    possible_answers = question.get("possible_answers", [])
+    if possible_answers:
+        weight_vector[i] = 5 / len(possible_answers)
 
+  total_score = len(weight_vector) * 5
+
+  return weight_vector, total_score
+
+def calculate_directional_scores(user1, user2):
+  # Calculate scores for user1 based on user2's answers and vice versa
+  weight_vector, total_score = get_weight_vector()
+
+  user1_answers = list(qa_collection.aggregate([
+     {"$match": {"user_id": ObjectId(user1)}},
+     {"$sort": {"question_number": -1}}
+  ]))
+
+  user1_prefs = list(qa_pref_collection.aggregate([
+     {"$match": {"user_id": ObjectId(user1)}},
+     {"$sort": {"question_number": -1}}
+  ]))
+
+  user2_answers = list(qa_collection.aggregate([
+     {"$match": {"user_id": ObjectId(user2)}},
+     {"$sort": {"question_number": -1}}
+  ]))
+
+  user2_prefs = list(qa_pref_collection.aggregate([
+     {"$match": {"user_id": ObjectId(user2)}},
+     {"$sort": {"question_number": -1}}
+  ]))
+
+  # Calculate scores for user1 based on user2's answers and vice versa
+  u1 = np.array([Q["encoding"] for Q in user1_answers])
+  u2 = np.array([Q["encoding"] for Q in user1_prefs])
+  v1 = np.array([Q["encoding"] for Q in user2_answers])
+  v2 = np.array([Q["encoding"] for Q in user2_prefs])
+
+  result1 = np.sum(np.abs(u2-v1) * weight_vector / total_score * 100)
+  result2 = np.sum(np.abs(u1-v2) * weight_vector / total_score * 100)
+
+  return result1, result2
+  
+def find_matches(user_id):
+
+  user_profile = profiles.find_one({"user_id": ObjectId(user_id)})
+  questions_answeres = list(qa_collection.find({"user_id": ObjectId(user_id)}))
+  questions_prefs = list(qa_pref_collection.find({"user_id": ObjectId(user_id)}))
+
+  gender_pref = questions_prefs
+
+
+  
+  
+    
 
 
 
