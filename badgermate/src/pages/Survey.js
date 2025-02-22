@@ -171,6 +171,7 @@ const Survey = () => {
       setCurrentIndex(currentIndex + 1);
     } else {
       // All items answered; submit responses (e.g., navigate to matches or POST responses)
+      console.log(responses);
       navigate('/matches', { state: responses });
     }
   };
