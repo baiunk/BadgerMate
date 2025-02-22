@@ -159,33 +159,42 @@ def new_user():
   user_id = profiles.insert_one(data).inserted_id
   return jsonify({"user_id": str(user_id)}), 201
   
-@app.route("/api/init_survey", methods=["GET"])
-def init_survey():
-    main_question = questions_collection.find_one({"question_number": 1})
-    if not main_question:
-        return jsonify({"error": "No question found"}), 404
+# Give all questions
+@app.route("/api/get_all_questions", methods=["GET"])
+def get_all_questions():
+    """
+    Retrieves all questions from the Questions collection.
+    Groups each question with its preference counterpart if applicable.
+    """
 
-    def format_question(q):
-        return {
-            "question_number": q.get("question_number"),
-            "question_text": q.get("question_text"),
-            "variable_name": q.get("variable_name"),
-            "data_type": q.get("data_type"),
-            "possible_answers": q.get("possible_answers"),
-            "html_input_type": q.get("html_input_type"),
-            "html_attributes": q.get("html_attributes")
-        }
+    # Fetch all questions and sort them by question_number
+    questions = list(questions_collection.find({}, {"_id": 0}).sort("question_number", 1))
 
-    result = format_question(main_question)
+    # Organize questions into pairs if they have prefq_number
+    grouped_questions = []
+    used_questions = set()  # Track questions that have been added
 
-    prefq_number = main_question.get("prefq_number")
-    if prefq_number:
-        pref_question = questions_collection.find_one({"question_number": prefq_number})
-        if pref_question:
-            pref_result = format_question(pref_question)
-            return jsonify({"question": result, "preference_question": pref_result}), 200
+    for question in questions:
+        if question["question_number"] in used_questions:
+            continue  # Skip questions that are already paired
 
-    return jsonify({"question": result}), 200
+        prefq_number = question.get("prefq_number")
+        
+        if prefq_number:
+            # Find the corresponding preference question
+            pref_question = next((q for q in questions if q["question_number"] == prefq_number), None)
+
+            if pref_question:
+                grouped_questions.append({"question": question, "preference_question": pref_question})
+                used_questions.add(prefq_number)  # Mark preference question as used
+            else:
+                grouped_questions.append({"question": question})  # No pref question found
+        else:
+            grouped_questions.append({"question": question})
+
+        used_questions.add(question["question_number"])  # Mark main question as used
+
+    return jsonify({"questions": grouped_questions}), 200
 
 @app.route("/api/matches", methods=["POST"])
 def matches():
@@ -198,6 +207,7 @@ def matches():
      return jsonify({"matches": matches}), 200
   else:
      return jsonify({"error": "No matches found"}), 404
+
 
 if __name__ == "__main__":
   app.run(debug=True, port=5000)
