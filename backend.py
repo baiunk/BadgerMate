@@ -15,6 +15,7 @@ db = client["Maddata"]
 profiles = db["Profile"]
 qa_collection = db["QA"]
 qa_pref_collection = db["QA_Pref"]
+questions_collection = db["Questions"]
 
 
 
@@ -36,6 +37,19 @@ def new_user():
   user_id = profiles.insert_one(data).inserted_id
   return jsonify({"user_id": str(user_id)}), 201
   
+@app.route("/api/init_survey", methods=["GET"])
+def init_survey(): 
+  main_question = questions_collection.find_one({"question_number": 1})
+
+  prefq_number = main_question.get("prefq_number")
+  if prefq_number:
+    pref_question = questions_collection.find_one({"question_number": prefq_number})
+    return jsonify({"question": main_question, "preference_question": pref_question}), 200
+
+  return jsonify({"question": main_question}), 200
+
+
+
 
 if __name__ == "__main__":
   app.run(debug=True, port=5000)
