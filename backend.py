@@ -148,6 +148,10 @@ def generate_random_user():
 
 
 # First api end point
+@app.route('/')
+def home():
+    return jsonify({"message": "Backend is working!"})
+
 @app.route("/api/new_user", methods=["POST"])
 def new_user():
   data = request.get_json()
@@ -196,6 +200,71 @@ def get_all_questions():
 
     return jsonify({"questions": grouped_questions}), 200
 
+# Add all answers to QA or QA_Pref
+@app.route("/api/submit_all_answers", methods=["POST"])
+def submit_all_answers(user_id):
+    """
+    Receives all answers at once from the website.
+    Sorts answers into QA (main questions or standalone) or QA_Pref (preference questions).
+    """
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    # Fetch all questions and create a lookup dictionary
+    all_questions = list(questions_collection.find({}, {"_id": 0, "variable_name": 1, "question_number": 1, "prefq_number": 1}))
+    question_lookup = {q["variable_name"]: q for q in all_questions}
+
+    qa_entries = []
+    qa_pref_entries = []
+
+    # Iterate over the provided answers
+    for variable_name, answer in data.items():
+        if variable_name not in question_lookup:
+            continue  # Ignore invalid variables
+
+        question_info = question_lookup[variable_name]
+        question_number = question_info["question_number"]
+        prefq_number = question_info.get("prefq_number")  # Can be null
+
+        # If the question has a prefq_number (meaning it is a main question), add it to QA
+        if prefq_number is not None:
+            qa_entries.append({
+                "user": user_id,
+                "question_number": question_number,
+                "variable_name": variable_name,
+                "answer": answer
+            })
+        else:
+            # If prefq_number is null, it is either a preference question or a standalone question
+            corresponding_main_question = next((q for q in all_questions if q.get("prefq_number") == question_number), None)
+
+            if corresponding_main_question:
+                # This means it is a preference question, so add it to QA_Pref
+                qa_pref_entries.append({
+                    "user": user_id,
+                    "question_number": question_number,
+                    "variable_name": variable_name,
+                    "answer": answer
+                })
+            else:
+                # Otherwise, it's a standalone question (like Location or Budget), so add it to QA
+                qa_entries.append({
+                    "user": user_id,
+                    "question_number": question_number,
+                    "variable_name": variable_name,
+                    "answer": answer
+                })
+
+    # Insert answers into respective collections
+    if qa_entries:
+        qa_collection.insert_many(qa_entries)
+
+    if qa_pref_entries:
+        qa_pref_collection.insert_many(qa_pref_entries)
+
+    return jsonify({"message": "All answers recorded successfully"}), 200
+
 @app.route("/api/matches/<user_id>", methods=["POST"])
 def matches():
   data = request.get_json()
@@ -214,5 +283,6 @@ def populate_db(num_users):
     generate_random_user()
   return jsonify({"message": f"Populated the test collection with {num_users} users"}), 200
 
-if __name__ == "__main__":
-  app.run(debug=True, port=5000)
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))  # Default to 5000 locally
+    app.run(host="0.0.0.0", port=port, debug=True)
