@@ -148,6 +148,10 @@ def generate_random_user():
 
 
 # First api end point
+@app.route('/')
+def home():
+    return jsonify({"message": "Backend is working!"})
+
 @app.route("/api/new_user", methods=["POST"])
 def new_user():
   data = request.get_json()
@@ -214,5 +218,6 @@ def populate_db(num_users):
     generate_random_user()
   return jsonify({"message": f"Populated the test collection with {num_users} users"}), 200
 
-if __name__ == "__main__":
-  app.run(debug=True, port=5000)
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))  # Default to 5000 locally
+    app.run(host="0.0.0.0", port=port, debug=True)
