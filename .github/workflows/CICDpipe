@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
@@ -16,36 +16,22 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2️⃣ Set Up Python (Backend)
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.9
-
-      # 3️⃣ Install Backend Dependencies
-      - name: Install Backend Dependencies
-        run: |
-          pip install -r requirements.txt
-
-      # 4️⃣ Create .env File for MongoDB Connection
-      - name: Create .env File
-        run: |
-          echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> .env
-
-      # 5️⃣ Start Backend Server
-      - name: Start Backend Server
-        run: |
-          nohup python backend.py &  # Replace 'app.py' with your backend's entry file
-
-      # 6️⃣ Set Up Node.js (Frontend)
+      # 2️⃣ Set Up Node.js (Frontend)
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      # 7️⃣ Install and Start React App
-      - name: Install & Start React App
+      # 3️⃣ Install and Build React App
+      - name: Install and Build React App
         run: |
           cd badgermate
           npm install
-          nohup npm start &  # Keeps React running in the background
+          npm run build
+
+      # 4️⃣ Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./badgermate/build
