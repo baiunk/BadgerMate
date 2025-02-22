@@ -28,11 +28,11 @@ qa_pref_collection = db["QA_Pref"]
 @app.route("/api/new_user", methods=["POST"])
 def new_user():
   data = request.get_json()
-  required_fields = ["FName", "LName", "Email", "Major", "Age", "Major", "Gender", "Location", "Bio", "Interests", "ProfilePicture"]
+  required_fields = ["FName", "LName", "Email", "Major", "Age"]
   for field in required_fields:
     if field not in data:
       return jsonify({"error": f"Missing required field: {field}"}), 400
-  
+  data["top_10_matches"] = {}
   user_id = profiles.insert_one(data).inserted_id
   return jsonify({"user_id": str(user_id)}), 201
   
