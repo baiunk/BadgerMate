@@ -1,12 +1,12 @@
 // src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Header from './components/Header';
-import Home from './components/Home';
-import Survey from './components/Survey';
-import Matches from './components/Matches';
+import Header from './pages/Header';
+import Home from './pages/Home';
+import Survey from './pages/Survey';
+import Matches from './pages/Matches';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { UserProvider } from './components/UserContext'; // Adjust the path if necessary
+import { UserProvider } from './pages/UserContext'; // Adjust the path if necessary
 
 function App() {
   return (
