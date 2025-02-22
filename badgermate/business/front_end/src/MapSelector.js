@@ -3,7 +3,7 @@ import { useState } from "react";
 import "leaflet/dist/leaflet.css";
 
 const MapSelector = ({ onLocationSelect }) => {
-  const [selectedArea, setSelectedArea] = useState(null);
+  const [selectedAreas, setSelectedAreas] = useState([]); // Store multiple selections
 
   // Restrict map movement to Madison boundaries
   const madisonBounds = [
@@ -42,13 +42,30 @@ const MapSelector = ({ onLocationSelect }) => {
       ],
     },
     {
-      name: "south ",
+      name: "South",
       bounds: [
         [43.0, -89.43],
         [43.05, -89.33],
       ],
     },
   ];
+
+  // Toggle area selection on click
+  const toggleSelection = (area) => {
+    setSelectedAreas((prevSelected) => {
+      if (prevSelected.includes(area.name)) {
+        // Remove from selection if already selected
+        const updatedSelection = prevSelected.filter((a) => a !== area.name);
+        onLocationSelect(updatedSelection); // Send updated selection to parent
+        return updatedSelection;
+      } else {
+        // Add new selection
+        const updatedSelection = [...prevSelected, area.name];
+        onLocationSelect(updatedSelection); // Send updated selection to parent
+        return updatedSelection;
+      }
+    });
+  };
 
   return (
     <MapContainer
@@ -59,7 +76,8 @@ const MapSelector = ({ onLocationSelect }) => {
       maxBoundsViscosity={1.0} // Hard lock to Madison
       style={{ height: "500px", width: "100%" }}
     >
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      {/* Minimalist Tile Layer (removes water) */}
+      <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}" />
 
       {/* Display selectable areas */}
       {areas.map((area, index) => (
@@ -67,14 +85,12 @@ const MapSelector = ({ onLocationSelect }) => {
           key={index}
           bounds={area.bounds}
           eventHandlers={{
-            click: () => {
-              setSelectedArea(area.name);
-              if (onLocationSelect) {
-                onLocationSelect({ area: area.name });
-              }
-            },
+            click: () => toggleSelection(area),
           }}
-          pathOptions={{ color: selectedArea === area.name ? "blue" : "red" }}
+          pathOptions={{
+            color: selectedAreas.includes(area.name) ? "blue" : "red",
+            fillOpacity: 0.5,
+          }}
         >
           <Popup>{area.name}</Popup>
         </Rectangle>
