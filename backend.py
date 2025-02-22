@@ -16,8 +16,16 @@ profiles = db["Profile"]
 qa_collection = db["QA"]
 qa_pref_collection = db["QA_Pref"]
 
+
+
+# Matchability functions
+
+
+
+
+
 # First api end point
-@app.route("api/new_user", methods=["POST"])
+@app.route("/api/new_user", methods=["POST"])
 def new_user():
   data = request.get_json()
   required_fields = ["FName", "LName", "Email", "Major", "Age", "Major", "Gender", "Location", "Bio", "Interests", "ProfilePicture"]
