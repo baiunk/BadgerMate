@@ -1,0 +1,1 @@
+do npm install react-router-dom rc-slider bootstrap
