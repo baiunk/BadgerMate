@@ -208,13 +208,11 @@ def matches():
   else:
      return jsonify({"error": "No matches found"}), 404
 
-
-if __name__ == "__main__":
-  app.run(debug=True, port=5000)
-
-
 @app.route("/api/populate_db/<int:num_users>", methods=["POST"])
 def populate_db(num_users):
   for _ in range(num_users):
     generate_random_user()
   return jsonify({"message": f"Populated the test collection with {num_users} users"}), 200
+
+if __name__ == "__main__":
+  app.run(debug=True, port=5000)
