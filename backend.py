@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 import os
-from flask import Flask
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from pymongo import MongoClient
 
@@ -11,4 +11,21 @@ app = Flask(__name__)
 CORS(app)
 
 client = MongoClient(MONGO_URI)
+db = client["Maddata"]
+profiles = db["Profile"]
+qa_collection = db["QA"]
+qa_pref_collection = db["QA_Pref"]
+
+# First api end point
+@app.route("api/new_user", methods=["POST"])
+def new_user():
+  data = request.get_json()
+  required_fields = ["FName", "LName", "Email", "Major", "Age", "Major", "Gender", "Location", "Bio", "Interests", "ProfilePicture"]
+  for field in required_fields:
+    if field not in data:
+      return jsonify({"error": f"Missing required field: {field}"}), 400
+  
+  user_id = profiles.insert_one(data).inserted_id
+  return jsonify({"user_id": str(user_id)}), 201
+  
 
