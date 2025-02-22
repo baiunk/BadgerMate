@@ -1,12 +1,46 @@
 /* custom.css */
-.btn-custom {
-    background-color: #5a2d82;
-    border: none;
-    color: #fff;
-    transition: background-color 0.3s ease;
-  }
-  
-  .btn-custom:hover {
-    background-color: #4a1d62;
-  }
-  
+.form-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border: 2px solid #007bff; /* Blue border */
+  border-radius: 5px;
+  background-color: #fff;   /* White background when not clicked */
+  color: #007bff;           /* Blue text when not clicked */
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  user-select: none;
+  position: relative;
+}
+
+/* Hide the actual checkbox */
+.form-check input {
+  opacity: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+/* When the hidden checkbox is checked, style the entire label as "clicked" */
+.form-check:has(input:checked) {
+  background-color: #007bff; /* Blue background when clicked */
+  color: #fff;               /* White text when clicked */
+  border: 2px solid #007bff;
+}
+
+.question-container {
+  min-height: 60px; /* Adjust this value to fit your longest question text */
+  display: flex;
+  align-items: center; /* Centers the question text vertically within the container */
+}
+
+/* Container for the answer options */
+.answer-options > * {
+  margin-bottom: 2rem; /* Adds spacing between each child element */
+}
+
+.answer-options > *:last-child {
+  margin-bottom: 1rem; /* Removes extra spacing after the last option */
+}
+
