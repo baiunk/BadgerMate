@@ -19,7 +19,7 @@ const Survey = () => {
 
   // Fetch the survey data when the component mounts
   useEffect(() => {
-    axios.get('http://3.134.238.10:5000/api/get_all_questions')
+    axios.get('https://badgermate.onrender.com/api/get_all_questions')
           .then((res) => {
         // Expect the API to return { questions: [ ... ] }
         // (Each item might be a pair or a single question.)
