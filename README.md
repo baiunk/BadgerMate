@@ -1,5 +1,5 @@
-#🦡 BadgerMate 🏡🎯
-##🚀 Hack the Roommate Hunt – Find Your Perfect Match at UW-Madison!
+# BadgerMate 🏡🎯
+## 🚀 Hack the Roommate Hunt – Find Your Perfect Match at UW-Madison!
 
 Are you tired of awkward Craigslist ads and random Facebook groups when searching for a roommate? BadgerMate is here to change that! 🏡✨
 
