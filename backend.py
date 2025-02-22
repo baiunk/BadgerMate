@@ -103,15 +103,32 @@ def new_user():
   return jsonify({"user_id": str(user_id)}), 201
   
 @app.route("/api/init_survey", methods=["GET"])
-def init_survey(): 
-  main_question = questions_collection.find_one({"question_number": 1})
+def init_survey():
+    main_question = questions_collection.find_one({"question_number": 1})
+    if not main_question:
+        return jsonify({"error": "No question found"}), 404
 
-  prefq_number = main_question.get("prefq_number")
-  if prefq_number:
-    pref_question = questions_collection.find_one({"question_number": prefq_number})
-    return jsonify({"question": main_question, "preference_question": pref_question}), 200
+    def format_question(q):
+        return {
+            "question_number": q.get("question_number"),
+            "question_text": q.get("question_text"),
+            "variable_name": q.get("variable_name"),
+            "data_type": q.get("data_type"),
+            "possible_answers": q.get("possible_answers"),
+            "html_input_type": q.get("html_input_type"),
+            "html_attributes": q.get("html_attributes")
+        }
 
-  return jsonify({"question": main_question}), 200
+    result = format_question(main_question)
+
+    prefq_number = main_question.get("prefq_number")
+    if prefq_number:
+        pref_question = questions_collection.find_one({"question_number": prefq_number})
+        if pref_question:
+            pref_result = format_question(pref_question)
+            return jsonify({"question": result, "preference_question": pref_result}), 200
+
+    return jsonify({"question": result}), 200
 
 
 
