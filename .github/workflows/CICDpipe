@@ -28,6 +28,7 @@ jobs:
           cd badgermate
           npm install
           npm run build
+          echo 'www.badgermate.com' > build/CNAME
 
       # 4️⃣ Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
