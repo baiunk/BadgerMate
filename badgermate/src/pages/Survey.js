@@ -19,7 +19,7 @@ const Survey = () => {
 
   // Fetch the survey data when the component mounts
   useEffect(() => {
-    axios.get('http://localhost:5000/api/get_all_questions')
+    axios.get('http://3.134.238.10:5000/api/get_all_questions')
           .then((res) => {
         // Expect the API to return { questions: [ ... ] }
         // (Each item might be a pair or a single question.)
@@ -171,6 +171,7 @@ const Survey = () => {
       setCurrentIndex(currentIndex + 1);
     } else {
       // All items answered; submit responses (e.g., navigate to matches or POST responses)
+      console.log(responses);
       navigate('/matches', { state: responses });
     }
   };

@@ -13,6 +13,7 @@
   transition: background-color 0.3s, color 0.3s;
   user-select: none;
   position: relative;
+  margin: 0.5rem
 }
 
 /* Hide the actual checkbox */
@@ -37,7 +38,7 @@
 
 /* Container for the answer options */
 .answer-options > * {
-  margin-bottom: 2rem; /* Adds spacing between each child element */
+  margin-bottom: 4rem; /* Adds spacing between each child element */
 }
 
 .answer-options > *:last-child {
