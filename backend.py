@@ -111,7 +111,7 @@ def get_all_questions():
     """
 
     # Fetch all questions and sort them by question_number
-    questions = list(questions_collection.find({}).sort("question_number", 1))
+    questions = list(questions_collection.find({}, {"_id": 0}).sort("question_number", 1))
 
     # Organize questions into pairs if they have prefq_number
     grouped_questions = []
