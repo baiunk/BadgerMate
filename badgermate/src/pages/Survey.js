@@ -7,6 +7,16 @@ import 'rc-slider/assets/index.css';
 
 const Survey = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  
+  const { userId } = location.state || {};
+
+  useEffect(() => {
+    if (!userId) {
+      navigate('/');
+    }
+  }, [userId, navigate]);
 
   // We'll fetch a list of survey items. Each item is an object that may have:
   // - "question" (the main question)
