@@ -37,3 +37,5 @@ def new_user():
   return jsonify({"user_id": str(user_id)}), 201
   
 
+if __name__ == "__main__":
+  app.run(debug=True, port=5000)
