@@ -176,9 +176,11 @@ def find_matches(user_id: str):
     profile = profiles.find_one({"_id": ObjectId(user)})  # Fetch the full profile document
     if profile:
       profile["score"] = score  # Add the score to the profile
+      profile["_id"] = str(profile["_id"])
       matched_profiles.append(profile)
 
   # Sort profiles by score in descending order
+
   sorted_profiles = sorted(matched_profiles, key=lambda x: x["score"], reverse=True)
 
   return sorted_profiles
@@ -328,8 +330,6 @@ def submit_all_answers():
     matches = find_matches(user_id)
 
     if matches:
-      top_10_matches = {user_id: float(score) for user_id, score in sorted(matches, key=lambda item: item[1], reverse=True)[:10]}
-      profiles.update_one({"user_id": ObjectId(user_id)}, {"$set": {"top_10_matches": top_10_matches}})
       return jsonify({"matches": matches}), 200
     else:
       return jsonify({"error": "No matches found"}), 404
