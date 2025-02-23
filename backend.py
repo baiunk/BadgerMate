@@ -120,8 +120,8 @@ def calculate_directional_scores(user1: str, user2: str):
 
   if len(u1) == 0 or len(u2) == 0 or len(v1) == 0 or len(v2) == 0:
      return 0, 0
-  result1 = np.sum(np.abs(u2-v1) * weight_vector / total_score * 100)
-  result2 = np.sum(np.abs(u1-v2) * weight_vector / total_score * 100)
+  result1 = (1-np.sum(np.abs(u2-v1) * weight_vector / total_score))*100
+  result2 = (1-np.sum(np.abs(u1-v2) * weight_vector / total_score))*100
 
   return result1, result2
   
