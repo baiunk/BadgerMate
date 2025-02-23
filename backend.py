@@ -89,7 +89,7 @@ def get_weight_vector():
 
   return weight_vector, total_score
 
-def calculate_directional_scores(user1, user2):
+def calculate_directional_scores(user1: str, user2: str):
   # Calculate scores for user1 based on user2's answers and vice versa
   weight_vector, total_score = get_weight_vector()
 
@@ -124,12 +124,12 @@ def calculate_directional_scores(user1, user2):
 
   return result1, result2
   
-def find_matches(user_id):
-  user_profile = profiles.find_one({"user_id": ObjectId(user_id)})
+def find_matches(user_id: str):
   cleaning_questions = questions_collection.find(
-      {"cleaning": True},
-      {"question_number": 1, "_id": 0}
+      {"cleaning": {"$exists": True}},
+      {"question_number": 1, "variable_name": 1, "data_type": 1, "cleaning": 1, "_id": 0}
   )
+
   cleaning_questions = list(cleaning_questions)
   cleaning_questions = [q["question_number"] for q in cleaning_questions]
   cleaning_answers = list(qa_collection.find({"user_id": ObjectId(user_id), "question_number": {"$in": cleaning_questions}}))
@@ -138,20 +138,25 @@ def find_matches(user_id):
   cleaning_answers_pref = [answer["answer"] for answer in cleaning_answers_pref]
 
   #going to be a list of answers checkboxes
-  gender_pref = cleaning_answers_pref[0]
-  user_budget = int(cleaning_answers[1])
-  user_location = cleaning_answers[2]
+  filtering_constraints = {}
+  # ChatGPT improved the efficiency of this code
+  for question, answer, answer_pref in zip(cleaning_questions, cleaning_answers, cleaning_answers_pref):
+    var_name = question["variable_name"]
+    constraints = question["cleaning"].split("_")
+    if constraints[0] == "String":
+        filtering_constraints[var_name] = answer if len(constraints) == 1 else answer_pref
+    elif constraints[0] == "Integer":
+        filtering_constraints[var_name] = {
+            "$lte": (500 if len(constraints) == 1 else int(constraints[1])),
+            "$gte": (int(answer) if len(constraints) == 1 else int(answer_pref))
+        }
+    elif constraints[0] == "List":
+        filtering_constraints[var_name] = {"$in": answer if len(constraints) == 1 else answer_pref}
 
   #cleaning
   filtered_users = profiles.aggregate([
-     {"$match": {
-        "Gender": {"$in": gender_pref},
-        "Location": user_location,
-        "Budget": {"$lte": 400, "$gte": user_budget}
-     }},
-     {"$project": {
-        "user_id": 1,
-     }}
+     {"$match": {filtering_constraints}},
+     {"$project": {"_id": 1,}}
   ])
 
   filtered_users = [str(user["_id"]) for user in filtered_users]
@@ -188,8 +193,6 @@ def generate_random_user():
     "Age": age,
     "top_10_matches": {}
   })
-
-
 
 
 # First api end point
