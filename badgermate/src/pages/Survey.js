@@ -204,10 +204,10 @@ const Survey = () => {
       try {
         // Post the data to the API endpoint
         console.log(finalSurveyData);
-        const response = await axios.post('http://localhost:5000/api//submit_all_answers', finalSurveyData);
+        const response = await axios.post('http://localhost:5000/api/submit_all_answers', finalSurveyData);
         console.log("Survey submitted successfully:", response.data);
         // Navigate to matches page, or display a confirmation
-        navigate('/matches', { state: finalSurveyData });
+        navigate('/matches', { state: { matches: response.data.matches } });
       } catch (error) {
         console.error("Error submitting survey:", error);
         alert("There was an error submitting your survey. Please try again.");
