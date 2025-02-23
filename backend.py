@@ -262,6 +262,7 @@ def submit_all_answers():
                 "user": ObjectId(user_id),
                 "question_number": question_number,
                 "variable_name": variable_name,
+                "encoding": encodings[answer],
                 "answer": answer
             })
         else:
@@ -274,6 +275,7 @@ def submit_all_answers():
                     "user": ObjectId(user_id),
                     "question_number": question_number,
                     "variable_name": variable_name,
+                    "encoding": encodings[answer],
                     "answer": answer
                 })
             else:
@@ -282,6 +284,7 @@ def submit_all_answers():
                     "user": ObjectId(user_id),
                     "question_number": question_number,
                     "variable_name": variable_name,
+                    "encoding": encodings[answer],
                     "answer": answer
                 })
 
