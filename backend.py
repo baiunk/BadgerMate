@@ -51,24 +51,17 @@ def generate_encodings():
 
     return encoding_dict
 
-def encode_answers(user_answers, encoding_dict):
+def encode_answer(answer, encoding_dict):
     """
-    Encodes user answers using the encoding dictionary.
-    - If an answer is a single value, replace it with its encoding.
-    - If an answer is a list, replace each value with its encoding.
+    Encodes a single answer using the encoding dictionary.
+    - If the answer is a list, replace each value with its encoding.
+    - If the answer is a single value, replace it with its encoding.
+    - If a value is not found in encoding_dict, it remains unchanged.
     """
-    encoded_answers = {}
-
-    for variable, answer in user_answers.items():
-        if isinstance(answer, list):
-            # Encode each item in the list
-            encoded_answers[variable] = [encoding_dict.get(item, item) for item in answer]
-        else:
-            # Encode single answer
-            encoded_answers[variable] = encoding_dict.get(answer, answer)
-
-    return encoded_answers
-
+    if isinstance(answer, list):
+        return [encoding_dict.get(item, item) for item in answer]  # Encode each item in the list
+    else:
+        return encoding_dict.get(answer, answer)  # Encode single answer
 
 encodings =  generate_encodings()
 
