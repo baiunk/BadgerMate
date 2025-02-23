@@ -80,7 +80,7 @@ const Home = () => {
     try {
       console.log(userData);
       // Send data to the backend (using the same API endpoint)
-      const response = await fetch('https://badgermate.onrender.com/api/new_user', {
+      const response = await fetch('http://localhost:5000/api/new_user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

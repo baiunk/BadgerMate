@@ -7,7 +7,7 @@ const Matches = () => {
   // Access the state passed from the previous page
   const location = useLocation();
   const { matches } = location.state || {};
-  const defaultImageUrl = '../assets/default.jpg';
+  const defaultImageUrl = '/default.png';
 
   if (!matches || matches.length === 0) {
     return <div>No match data available.</div>;
@@ -60,6 +60,19 @@ const Matches = () => {
                 return (
                   <div key={match.id} className="card mb-2 m-4" style={{ width: '40rem' }}>
                     <div className="card-body">
+                    <div className="card-body text-center">
+                          <img
+                            src={imageSrc}
+                            alt={`${match.FName} ${match.LName}`}
+                            style={{
+                              width: '150px',
+                              height: '150px',
+                              objectFit: 'cover',
+                              borderRadius: '0%',
+                              marginBottom: '1rem'
+                            }}
+                            />
+                          </div>
                       <h5 className="card-title">
                         {match.FName} {match.LName}
                       </h5>
