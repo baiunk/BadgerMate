@@ -140,6 +140,13 @@ def calculate_directional_scores(user1: str, user2: str):
      {"$match": {"user": ObjectId(user2), "question_number": {"$nin": ignoring_cleaning_questions_numbers}}},
      {"$sort": {"question_number": -1}}
   ]))
+
+  user1_answers = user1_answers[:7]
+  user1_prefs   = user1_prefs[:7]
+  user2_answers = user2_answers[:7]
+  user2_prefs   = user2_prefs[:7]
+
+
   # Calculate scores for user1 based on user2's answers and vice versa
   u1 = np.array([Q["encoding"] for Q in user1_answers])
   u2 = np.array([Q["encoding"] for Q in user1_prefs])
