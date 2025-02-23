@@ -29,7 +29,7 @@ const Survey = () => {
 
   // Fetch the survey data when the component mounts
   useEffect(() => {
-    axios.get('https://badgermate.onrender.com/api/get_all_questions')
+    axios.get('https://localhost:5000/api/get_all_questions')
           .then((res) => {
         // Expect the API to return { questions: [ ... ] }
         // (Each item might be a pair or a single question.)
@@ -172,7 +172,7 @@ const Survey = () => {
     return true;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!isCurrentItemValid()) {
       alert("Please answer the question(s) before proceeding.");
       return;
@@ -180,9 +180,21 @@ const Survey = () => {
     if (currentIndex < surveyItems.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
-      // All items answered; submit responses (e.g., navigate to matches or POST responses)
-      console.log(responses);
-      navigate('/matches', { state: responses });
+      const finalSurveyData = {
+        userId, // from useLocation or context
+        responses,
+      };
+  
+      try {
+        // Post the data to the API endpoint
+        const response = await axios.post('http://localhost:5000/api/submit_survey', finalSurveyData);
+        console.log("Survey submitted successfully:", response.data);
+        // Navigate to matches page, or display a confirmation
+        navigate('/matches', { state: finalSurveyData });
+      } catch (error) {
+        console.error("Error submitting survey:", error);
+        alert("There was an error submitting your survey. Please try again.");
+      }
     }
   };
 
