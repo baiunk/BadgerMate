@@ -85,33 +85,43 @@ def get_weight_vector():
 def calculate_directional_scores(user1: str, user2: str):
   # Calculate scores for user1 based on user2's answers and vice versa
   weight_vector, total_score = get_weight_vector()
-
+  ignoring_cleaning_questions = list(questions_collection.find(
+    {"cleaning": {"$exists": True}},
+    {"question_number": 1, "prefq_number": 1}
+  ))
+  ignoring_cleaning_questions_numbers = [q["question_number"] for q in ignoring_cleaning_questions]
+  for q in ignoring_cleaning_questions:
+      if q["prefq_number"] is not None and q["prefq_number"] not in ignoring_cleaning_questions_numbers:
+          ignoring_cleaning_questions_numbers.append(q["prefq_number"])
   user1_answers = list(qa_collection.aggregate([
-     {"$match": {"user_id": ObjectId(user1)}},
+     {"$match": {"user": ObjectId(user1), "question_number": {"$nin": ignoring_cleaning_questions_numbers}}},
      {"$sort": {"question_number": -1}}
   ]))
 
   user1_prefs = list(qa_pref_collection.aggregate([
-     {"$match": {"user_id": ObjectId(user1)}},
+     {"$match": {"user": ObjectId(user1), "question_number": {"$nin": ignoring_cleaning_questions_numbers}}},
      {"$sort": {"question_number": -1}}
   ]))
 
   user2_answers = list(qa_collection.aggregate([
-     {"$match": {"user_id": ObjectId(user2)}},
+     {"$match": {"user": ObjectId(user2), "question_number": {"$nin": ignoring_cleaning_questions_numbers}}},
      {"$sort": {"question_number": -1}}
   ]))
 
   user2_prefs = list(qa_pref_collection.aggregate([
-     {"$match": {"user_id": ObjectId(user2)}},
+     {"$match": {"user": ObjectId(user2), "question_number": {"$nin": ignoring_cleaning_questions_numbers}}},
      {"$sort": {"question_number": -1}}
   ]))
-
   # Calculate scores for user1 based on user2's answers and vice versa
   u1 = np.array([Q["encoding"] for Q in user1_answers])
   u2 = np.array([Q["encoding"] for Q in user1_prefs])
   v1 = np.array([Q["encoding"] for Q in user2_answers])
   v2 = np.array([Q["encoding"] for Q in user2_prefs])
 
+  print(u1, u2, v1, v2)
+  if len(u1) == 0 or len(u2) == 0 or len(v1) == 0 or len(v2) == 0:
+     print("No answers found")
+     return 0, 0
   result1 = np.sum(np.abs(u2-v1) * weight_vector / total_score * 100)
   result2 = np.sum(np.abs(u1-v2) * weight_vector / total_score * 100)
 
@@ -148,7 +158,7 @@ def find_matches(user_id: str):
 
   #cleaning
   filtered_users = profiles.aggregate([
-     {"$match": {filtering_constraints}},
+     {"$match": filtering_constraints},
      {"$project": {"_id": 1,}}
   ])
 
@@ -156,11 +166,14 @@ def find_matches(user_id: str):
 
   compatibility_scores = {}
   for user in filtered_users:
-    score1, score2 = calculate_directional_scores(user_id, user["_id"])
+    if user == user_id:
+      continue
+    score1, score2 = calculate_directional_scores(user_id, user)
     avg_score = (score1 + score2) / 2
     compatibility_scores[user] = avg_score
 
   sorted_matches = sorted(compatibility_scores.items(), key=lambda x: x[1], reverse=True)
+  print(sorted_matches)
   return sorted_matches
 
 
@@ -252,24 +265,20 @@ def submit_all_answers():
     if not data:
         return jsonify({"error": "No data provided"}), 400
     
-    user_id = data.get("user_id")
-
+    user_id = data.get("userId")
+    responses = data.get("responses")
     # Fetch all questions and create a lookup dictionary
     all_questions = list(questions_collection.find({}, {"_id": 0, "variable_name": 1, "question_number": 1, "prefq_number": 1}))
-    question_lookup = {q["variable_name"]: q for q in all_questions}
-
+    question_lookup = {q["variable_name"]: {k: v for k, v in q.items() if k != "variable_name"} for q in all_questions}
     qa_entries = []
     qa_pref_entries = []
-
     # Iterate over the provided answers
-    for variable_name, answer in data.items():
-        if variable_name not in question_lookup:
+    for variable_name, answer in responses.items():
+        if variable_name not in question_lookup.keys():
             continue  # Ignore invalid variables
 
-        question_info = question_lookup[variable_name]
-        question_number = question_info["question_number"]
-        prefq_number = question_info.get("prefq_number")  # Can be null
-
+        question_number = question_lookup[variable_name]["question_number"]
+        prefq_number = question_lookup[variable_name]["prefq_number"]   # Can be null
         # If the question has a prefq_number (meaning it is a main question), add it to QA
         if prefq_number is not None:
             qa_entries.append({
@@ -312,7 +321,7 @@ def submit_all_answers():
     matches = find_matches(user_id)
 
     if matches:
-      top_10_matches = dict(sorted(matches.items(), key=lambda item: item[1], reverse=True)[:10])
+      top_10_matches = {user_id: float(score) for user_id, score in sorted(matches, key=lambda item: item[1], reverse=True)[:10]}
       profiles.update_one({"user_id": ObjectId(user_id)}, {"$set": {"top_10_matches": top_10_matches}})
       return jsonify({"matches": matches}), 200
     else:
