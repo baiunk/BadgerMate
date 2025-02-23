@@ -1,17 +1,45 @@
-import './custom.css'
+import './custom.css';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext'; // Ensure this path is correct
 
 const Home = () => {
   const navigate = useNavigate();
-  const { setUserId } = useUser(); // Call useUser at the top level
+  const { setUserId } = useUser();
+  
+  // Form fields
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [major, setMajor] = useState('');
   const [age, setAge] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  
+  // Profile picture states
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const defaultImageUrl = '/images/default-profile.png'; // Ensure this image exists in your public folder
+
+  // Helper: Convert file to base64
+  const getBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setSelectedFile(null);
+      setPreviewUrl('');
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,9 +62,24 @@ const Home = () => {
       Email: email,
     };
 
+    // If a profile picture file is selected, convert it to base64 and add to the userData;
+    // otherwise, add the default image URL.
+    if (selectedFile) {
+      try {
+        const base64Image = await getBase64(selectedFile);
+        userData.profilePicture = base64Image;
+      } catch (err) {
+        console.error("Error converting file:", err);
+        setError("Error processing the profile picture");
+        return;
+      }
+    } else {
+      userData.profilePicture = defaultImageUrl;
+    }
+
     try {
       console.log(userData);
-      // Send data to the backend
+      // Send data to the backend (using the same API endpoint)
       const response = await fetch('https://badgermate.onrender.com/api/new_user', {
         method: 'POST',
         headers: {
@@ -120,6 +163,29 @@ const Home = () => {
           />
           {error && <div className="text-danger mt-2">{error}</div>}
         </div>
+        
+        {/* Profile Picture Section */}
+        <div className="mb-3">
+          <h3>Profile Picture</h3>
+          <img
+            src={previewUrl || defaultImageUrl}
+            alt="Profile Preview"
+            style={{
+              width: '150px',
+              height: '150px',
+              objectFit: 'cover',
+              borderRadius: '0%',
+              display: 'block',
+              marginBottom: '1rem'
+            }}
+          />
+          <input 
+            type="file" 
+            accept="image/*" 
+            onChange={handleFileChange} 
+          />
+        </div>
+        
         <button type="submit" className="btn btn-primary">Continue</button>
       </form>
     </div>

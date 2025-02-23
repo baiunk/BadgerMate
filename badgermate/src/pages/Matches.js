@@ -14,33 +14,36 @@ const Matches = () => {
 
   return (
     <div>
+      {console.log(matches)}
       <h2 className="mb-4 text-center">Roommate Matches</h2>
       <div className="row">
-        <div className="col-md-3">
-          {/* Future filters/navigation can be added here */}
-        </div>
-        <div className="col-md-9">
+        <div className="col">
           <div className="d-flex flex-wrap justify-content-center">
             {matches.map((match, index) => {
               if (index === 0) {
                 return (
-                  <div key={match.id} className="card mb-4 border-dark m-2" style={{ width: '40rem' }}>
-                    <div className="card-body">
-                      <h3 className="card-title">
-                        {match.FName}  {match.LName} (Top Match)
-                      </h3>
-                      <p className="card-text">
-                        <strong>Match Score:</strong> {Math.round(match.score)}
-                      </p>
-                      <p className="card-text">
-                        {match.Major} | {match.Email}
-                      </p>
+                  <div className = "col-12">
+                    <div key={match.id} className="card mb-4 border-dark mx-auto" style={{ width: '40rem' }}>
+                      <div className="card-body">
+                        <h3 className="card-title">
+                          {match.FName}  {match.LName} (Top Match)
+                        </h3>
+                        <p className="card-text">
+                          <strong>Match Score:</strong> {Math.round(match.score)}
+                        </p>
+                        <p className="card-text">
+                          {match.Major}
+                        </p>
+                        <p className="card-text">
+                          {match.Email}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 );
               } else {
                 return (
-                  <div key={match.id} className="card mb-1 m-14" style={{ width: '40rem' }}>
+                  <div key={match.id} className="card mb-2 m-4" style={{ width: '40rem' }}>
                     <div className="card-body">
                       <h5 className="card-title">
                         {match.FName} {match.LName}
@@ -49,7 +52,10 @@ const Matches = () => {
                         <strong>Match Score:</strong> {Math.round(match.score)}
                       </p>
                       <p className="card-text">
-                        {match.Major} | {match.Email}
+                        {match.Major} 
+                      </p>
+                      <p className="card-text">
+                        {match.Email} 
                       </p>
                     </div>
                   </div>
