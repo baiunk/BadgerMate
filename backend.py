@@ -118,9 +118,7 @@ def calculate_directional_scores(user1: str, user2: str):
   v1 = np.array([Q["encoding"] for Q in user2_answers])
   v2 = np.array([Q["encoding"] for Q in user2_prefs])
 
-  print(u1, u2, v1, v2)
   if len(u1) == 0 or len(u2) == 0 or len(v1) == 0 or len(v2) == 0:
-     print("No answers found")
      return 0, 0
   result1 = np.sum(np.abs(u2-v1) * weight_vector / total_score * 100)
   result2 = np.sum(np.abs(u1-v2) * weight_vector / total_score * 100)
@@ -172,9 +170,18 @@ def find_matches(user_id: str):
     avg_score = (score1 + score2) / 2
     compatibility_scores[user] = avg_score
 
-  sorted_matches = sorted(compatibility_scores.items(), key=lambda x: x[1], reverse=True)
-  print(sorted_matches)
-  return sorted_matches
+  # Fetch full profile documents and add the score
+  matched_profiles = []
+  for user, score in compatibility_scores.items():
+    profile = profiles.find_one({"_id": ObjectId(user)})  # Fetch the full profile document
+    if profile:
+      profile["score"] = score  # Add the score to the profile
+      matched_profiles.append(profile)
+
+  # Sort profiles by score in descending order
+  sorted_profiles = sorted(matched_profiles, key=lambda x: x["score"], reverse=True)
+
+  return sorted_profiles
 
 
 ## Populate DB with dummy data
