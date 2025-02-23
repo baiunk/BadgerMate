@@ -202,7 +202,7 @@ def get_all_questions():
 
 # Add all answers to QA or QA_Pref
 @app.route("/api/submit_all_answers", methods=["POST"])
-def submit_all_answers(user_id):
+def submit_all_answers():
     """
     Receives all answers at once from the website.
     Sorts answers into QA (main questions or standalone) or QA_Pref (preference questions).
@@ -210,6 +210,8 @@ def submit_all_answers(user_id):
     data = request.get_json()
     if not data:
         return jsonify({"error": "No data provided"}), 400
+    
+    user_id = data.get("user_id")
 
     # Fetch all questions and create a lookup dictionary
     all_questions = list(questions_collection.find({}, {"_id": 0, "variable_name": 1, "question_number": 1, "prefq_number": 1}))
@@ -263,20 +265,16 @@ def submit_all_answers(user_id):
     if qa_pref_entries:
         qa_pref_collection.insert_many(qa_pref_entries)
 
-    return jsonify({"message": "All answers recorded successfully"}), 200
+    matches = find_matches(user_id)
 
-@app.route("/api/matches/<user_id>", methods=["POST"])
-def matches():
-  data = request.get_json()
-  user_id = data.get("user_id")
-  matches = find_matches(user_id)
-  if matches:
-     top_10_matches = dict(sorted(matches.items(), key=lambda item: item[1], reverse=True)[:10])
-     profiles.update_one({"user_id": ObjectId(user_id)}, {"$set": {"top_10_matches": top_10_matches}})
-     return jsonify({"matches": matches}), 200
-  else:
-     return jsonify({"error": "No matches found"}), 404
-
+    if matches:
+      top_10_matches = dict(sorted(matches.items(), key=lambda item: item[1], reverse=True)[:10])
+      profiles.update_one({"user_id": ObjectId(user_id)}, {"$set": {"top_10_matches": top_10_matches}})
+      return jsonify({"matches": matches}), 200
+    else:
+      return jsonify({"error": "No matches found"}), 404
+    
+    
 @app.route("/api/populate_db/<int:num_users>", methods=["POST"])
 def populate_db(num_users):
   for _ in range(num_users):
