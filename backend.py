@@ -63,6 +63,31 @@ def encode_answer(answer, encoding_dict):
         return [encoding_dict.get(item, item) for item in answer]  # Encode each item in the list
     else:
         return encoding_dict.get(answer, answer)  # Encode single answer
+    
+def update_user_profile(user_id, responses):
+    """
+    Updates the user's profile with gender, location (as an array), and budget.
+    """
+    profile_collection = db["Profile"]
+
+    # Extract relevant attributes from the responses
+    gender = responses.get("Gender")
+    location = responses.get("Location")  # This should be an array
+    budget = responses.get("Budget")
+
+    # Ensure location is stored as an array (MongoDB format)
+    if isinstance(location, str):
+        location = [location]  # Convert single location to array
+
+    # Update the user profile in MongoDB
+    profile_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {
+            "gender": gender,
+            "location": location,
+            "budget": budget
+        }}
+    )
 
 encodings =  generate_encodings()
 
@@ -327,6 +352,8 @@ def submit_all_answers():
 
     if qa_pref_entries:
         qa_pref_collection.insert_many(qa_pref_entries)
+
+    update_user_profile(user_id, responses)
 
     matches = find_matches(user_id)
 
