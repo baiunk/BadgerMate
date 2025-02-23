@@ -51,6 +51,24 @@ def generate_encodings():
 
     return encoding_dict
 
+def encode_answers(user_answers, encoding_dict):
+    """
+    Encodes user answers using the encoding dictionary.
+    - If an answer is a single value, replace it with its encoding.
+    - If an answer is a list, replace each value with its encoding.
+    """
+    encoded_answers = {}
+
+    for variable, answer in user_answers.items():
+        if isinstance(answer, list):
+            # Encode each item in the list
+            encoded_answers[variable] = [encoding_dict.get(item, item) for item in answer]
+        else:
+            # Encode single answer
+            encoded_answers[variable] = encoding_dict.get(answer, answer)
+
+    return encoded_answers
+
 
 encodings =  generate_encodings()
 
@@ -262,7 +280,7 @@ def submit_all_answers():
                 "user": ObjectId(user_id),
                 "question_number": question_number,
                 "variable_name": variable_name,
-                "encoding": encodings[answer],
+                "encoding": encode_answers(answer, encodings),
                 "answer": answer
             })
         else:
@@ -275,7 +293,7 @@ def submit_all_answers():
                     "user": ObjectId(user_id),
                     "question_number": question_number,
                     "variable_name": variable_name,
-                    "encoding": encodings[answer],
+                    "encoding": encode_answers(answer, encodings),
                     "answer": answer
                 })
             else:
@@ -284,7 +302,7 @@ def submit_all_answers():
                     "user": ObjectId(user_id),
                     "question_number": question_number,
                     "variable_name": variable_name,
-                    "encoding": encodings[answer],
+                    "encoding": encode_answers(answer, encodings),
                     "answer": answer
                 })
 
