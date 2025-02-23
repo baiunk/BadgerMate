@@ -126,33 +126,24 @@ def calculate_directional_scores(user1: str, user2: str):
   return result1, result2
   
 def find_matches(user_id: str):
-  cleaning_questions = questions_collection.find(
-      {"cleaning": {"$exists": True}},
-      {"question_number": 1, "variable_name": 1, "data_type": 1, "cleaning": 1, "_id": 0}
-  )
+  user_answers = list(qa_collection.find({
+        "user": ObjectId(user_id), 
+        "question_number": {"$in": [16,3]}
+    }, {"answer": 1, "_id": 0}))
+  
+  user_prefs = list(qa_pref_collection.find({
+        "user": ObjectId(user_id),
+        "question_number": 2
+    }, {"answer": 1, "_id": 0}))
 
-  cleaning_questions = list(cleaning_questions)
-  cleaning_questions = [q["question_number"] for q in cleaning_questions]
-  cleaning_answers = list(qa_collection.find({"user_id": ObjectId(user_id), "question_number": {"$in": cleaning_questions}}))
-  cleaning_answers_pref = list(qa_pref_collection.find({"user_id": ObjectId(user_id), "question_number": {"$in": cleaning_questions}}))
-  cleaning_answers = [answer["answer"] for answer in cleaning_answers]
-  cleaning_answers_pref = [answer["answer"] for answer in cleaning_answers_pref]
-
-  #going to be a list of answers checkboxes
+  gender_answer = user_prefs[0]["answer"]
+  location_answer = user_answers[1]["answer"]
+  budget_answer = user_prefs[0]["answer"]
+  
   filtering_constraints = {}
-  # ChatGPT improved the efficiency of this code
-  for question, answer, answer_pref in zip(cleaning_questions, cleaning_answers, cleaning_answers_pref):
-    var_name = question["variable_name"]
-    constraints = question["cleaning"].split("_")
-    if constraints[0] == "String":
-        filtering_constraints[var_name] = answer if len(constraints) == 1 else answer_pref
-    elif constraints[0] == "Integer":
-        filtering_constraints[var_name] = {
-            "$lte": (500 if len(constraints) == 1 else int(constraints[1])),
-            "$gte": (int(answer) if len(constraints) == 1 else int(answer_pref))
-        }
-    elif constraints[0] == "List":
-        filtering_constraints[var_name] = {"$in": answer if len(constraints) == 1 else answer_pref}
+  filtering_constraints["Gender"] = {"$in":gender_answer }
+  filtering_constraints["Location"] = {"$in":location_answer }
+  filtering_constraints["Budget"] = {"$lte": 500, "$gte": budget_answer}
 
   #cleaning
   filtered_users = profiles.aggregate([
@@ -184,7 +175,6 @@ def find_matches(user_id: str):
   sorted_profiles = sorted(matched_profiles, key=lambda x: x["score"], reverse=True)
 
   return sorted_profiles
-
 
 ## Populate DB with dummy data
 first_names = ["John", "Emma", "Sophia", "Liam", "Noah", "Aiden", "Olivia", "Ethan", "Mia", "James"]
