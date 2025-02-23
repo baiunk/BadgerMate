@@ -4,10 +4,10 @@
   align-items: center;
   justify-content: center;
   padding: 10px 20px;
-  border: 2px solid #007bff; /* Blue border */
+  border: 2px solid #000; /* Blue border */
   border-radius: 5px;
   background-color: #fff;   /* White background when not clicked */
-  color: #007bff;           /* Blue text when not clicked */
+  color: #000;           /* Blue text when not clicked */
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
@@ -25,9 +25,9 @@
 
 /* When the hidden checkbox is checked, style the entire label as "clicked" */
 .form-check:has(input:checked) {
-  background-color: #007bff; /* Blue background when clicked */
+  background-color: #C41E3A; 
   color: #fff;               /* White text when clicked */
-  border: 2px solid #007bff;
+  border: 2px solid #C41E3A;
 }
 
 .question-container {

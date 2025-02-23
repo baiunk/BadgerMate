@@ -6,7 +6,7 @@ const Header = () => {
   return (
     <header
       style={{
-        backgroundColor: '#333',
+        backgroundColor: '#C41E3A',
         color: '#fff',
         padding: '20px',
         textAlign: 'center',
@@ -14,7 +14,7 @@ const Header = () => {
       }}
     >
       <h1>
-        <Link to="/" style={{ color: '#fff', textDecoration: 'none' }}>
+        <Link to="/" style={{ color: '#fff',textDecoration: 'none' }}>
           BadgerMate
         </Link>
       </h1>
