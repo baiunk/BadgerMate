@@ -166,7 +166,7 @@ const Home = () => {
         
         {/* Profile Picture Section */}
         <div className="mb-3">
-          <h3>Profile Picture</h3>
+          <h3>Profile Picture (optional)</h3>
           <img
             src={previewUrl || defaultImageUrl}
             alt="Profile Preview"
