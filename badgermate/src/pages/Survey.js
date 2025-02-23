@@ -2,7 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import Slider from 'rc-slider';
+import CustomSlider from './customSlider';
 import 'rc-slider/assets/index.css';
 
 const Survey = () => {
@@ -29,13 +31,27 @@ const Survey = () => {
 
   // Fetch the survey data when the component mounts
   useEffect(() => {
-    axios.get('https://localhost:5000/api/get_all_questions')
+    axios.get('http://localhost:5000/api/get_all_questions')
           .then((res) => {
         // Expect the API to return { questions: [ ... ] }
         // (Each item might be a pair or a single question.)
         // We assume the API already returns the items in the desired order.
-        setSurveyItems(res.data.questions);
-      })
+      const questions = res.data.questions;
+      setSurveyItems(questions);
+      
+      // Pre-populate default responses for slider-type questions.
+      const initialResponses = {};
+      questions.forEach(item => {
+        const main = item.question;
+        if (main.html_input_type === "range") {
+          initialResponses[main.variable_name] = parseInt(main.html_attributes.value, 10);
+        }
+        if (item.preference_question && item.preference_question.html_input_type === "range") {
+          initialResponses[item.preference_question.variable_name] = parseInt(item.preference_question.html_attributes.value, 10);
+        }
+      });
+      setResponses(initialResponses);
+    })
       .catch((err) => {
         console.error("Error fetching survey questions:", err);
       });
@@ -115,7 +131,7 @@ const Survey = () => {
               value={responses[q.variable_name] || parseInt(q.html_attributes.value, 10)}
               onChange={value => updateResponse(q.variable_name, value)}
             />
-            <p className="mt-2">
+            <p className="slider mt-2">
               Selected: ${responses[q.variable_name] || q.html_attributes.value} {responses[q.variable_name] === q.html_attributes.max && `( ${q.html_attributes.max}+ )`}
             </p>
           </>
@@ -187,7 +203,8 @@ const Survey = () => {
   
       try {
         // Post the data to the API endpoint
-        const response = await axios.post('http://localhost:5000/api/submit_survey', finalSurveyData);
+        console.log(finalSurveyData);
+        const response = await axios.post('http://localhost:5000/api//submit_all_answers', finalSurveyData);
         console.log("Survey submitted successfully:", response.data);
         // Navigate to matches page, or display a confirmation
         navigate('/matches', { state: finalSurveyData });

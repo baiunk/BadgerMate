@@ -1,0 +1,24 @@
+/* Darker rail */
+.rc-slider-rail {
+    background-color: #444;
+  }
+  
+  /* Darker track */
+  .rc-slider-track {
+    background-color: #222;
+  }
+  
+  /* Dark handle styling */
+  .rc-slider-handle {
+    border: 2px solid #222;
+    background-color: #333;
+    /* Optional: add a shadow for a more pronounced effect */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.6);
+  }
+  
+  /* Styling for mark labels */
+  .rc-slider-mark-text {
+    color: #fff;    /* white text for contrast */
+    font-size: 12px;
+  }
+  

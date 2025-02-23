@@ -11,7 +11,7 @@ load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 client = MongoClient(MONGO_URI)
 db = client["Maddata"]
