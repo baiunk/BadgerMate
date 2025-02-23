@@ -25,7 +25,34 @@ qa_pref_collection_test = db["QA_Pref_Test"]
 
 
 
+
+
 # Matchability functions
+
+
+# Encodings function
+def generate_encodings():
+    """
+    Generates a dictionary mapping possible answers to their encodings
+    based on the order they appear in the Questions collection.
+    """
+    questions_collection = db["Questions"]
+    encoding_dict = {}
+
+    # Fetch all questions that have possible answers
+    questions = questions_collection.find({}, {"_id": 0, "possible_answers": 1})
+
+    for question in questions:
+        possible_answers = question.get("possible_answers", [])
+
+        # Create encoding for each possible answer using index + 1
+        for index, answer in enumerate(possible_answers):
+            encoding_dict[answer] = index + 1  # Store as a flat key-value pair
+
+    return encoding_dict
+
+
+encodings =  generate_encodings()
 
 # helper function for weight vector
 def get_weight_vector():
@@ -232,7 +259,7 @@ def submit_all_answers():
         # If the question has a prefq_number (meaning it is a main question), add it to QA
         if prefq_number is not None:
             qa_entries.append({
-                "user": user_id,
+                "user": ObjectId(user_id),
                 "question_number": question_number,
                 "variable_name": variable_name,
                 "answer": answer
@@ -244,7 +271,7 @@ def submit_all_answers():
             if corresponding_main_question:
                 # This means it is a preference question, so add it to QA_Pref
                 qa_pref_entries.append({
-                    "user": user_id,
+                    "user": ObjectId(user_id),
                     "question_number": question_number,
                     "variable_name": variable_name,
                     "answer": answer
@@ -252,7 +279,7 @@ def submit_all_answers():
             else:
                 # Otherwise, it's a standalone question (like Location or Budget), so add it to QA
                 qa_entries.append({
-                    "user": user_id,
+                    "user": ObjectId(user_id),
                     "question_number": question_number,
                     "variable_name": variable_name,
                     "answer": answer
@@ -274,7 +301,7 @@ def submit_all_answers():
     else:
       return jsonify({"error": "No matches found"}), 404
     
-    
+
 @app.route("/api/populate_db/<int:num_users>", methods=["POST"])
 def populate_db(num_users):
   for _ in range(num_users):
