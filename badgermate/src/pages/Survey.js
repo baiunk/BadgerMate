@@ -4,7 +4,6 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import Slider from 'rc-slider';
-import CustomSlider from './customSlider';
 import 'rc-slider/assets/index.css';
 
 const Survey = () => {
