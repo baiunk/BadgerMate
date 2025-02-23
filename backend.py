@@ -169,7 +169,6 @@ def find_matches(user_id: str):
   filtering_constraints = {}
   filtering_constraints["Gender"] = {"$in":gender_answer }
   filtering_constraints["Budget"] = {"$gte": 500, "$lte": budget_answer}
-  print(filtering_constraints)
   #cleaning
   filtered_users = profiles.aggregate([
      {"$match": filtering_constraints},
@@ -187,7 +186,6 @@ def find_matches(user_id: str):
   # Now filtered_users contains only those users whose location answers intersect with the user's answers
 
   filtered_users = [str(user["_id"]) for user in filtered_users]
-  print(filtered_users)
   compatibility_scores = {}
   for user in filtered_users:
     if user == user_id:
@@ -211,7 +209,6 @@ def find_matches(user_id: str):
 
   return sorted_profiles
 
-print(find_matches("67ba9c64cfb5831a02620707"))
 ## Populate DB with dummy data
 first_names = ["John", "Emma", "Sophia", "Liam", "Noah", "Aiden", "Olivia", "Ethan", "Mia", "James"]
 last_names = ["Smith", "Johnson", "Williams", "Brown", "Miller", "Davis", "Garcia", "Rodriguez", "Anderson"]
