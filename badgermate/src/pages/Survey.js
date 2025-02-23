@@ -30,7 +30,7 @@ const Survey = () => {
 
   // Fetch the survey data when the component mounts
   useEffect(() => {
-    axios.get('http://localhost:5000/api/get_all_questions')
+    axios.get('https://badgermate.onrender.com/api/get_all_questions')
           .then((res) => {
         // Expect the API to return { questions: [ ... ] }
         // (Each item might be a pair or a single question.)
@@ -203,7 +203,7 @@ const Survey = () => {
       try {
         // Post the data to the API endpoint
         console.log(finalSurveyData);
-        const response = await axios.post('http://localhost:5000/api/submit_all_answers', finalSurveyData);
+        const response = await axios.post('https://badgermate.onrender.com/api/submit_all_answers', finalSurveyData);
         console.log("Survey submitted successfully:", response.data);
         // Navigate to matches page, or display a confirmation
         navigate('/matches', { state: { matches: response.data.matches } });
