@@ -52,6 +52,8 @@ def generate_encodings():
 
     return encoding_dict
 
+encodings = generate_encodings()
+
 def encode_answer(answer, encoding_dict):
     """
     Encodes a single answer using the encoding dictionary.
