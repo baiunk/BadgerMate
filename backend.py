@@ -150,7 +150,7 @@ def calculate_directional_scores(user1: str, user2: str):
   result2 = (1-np.sum(np.abs(u1-v2) * weight_vector / total_score))*100
 
   return result1, result2
-  
+
 def find_matches(user_id: str):
   user_answers = list(qa_collection.find({
         "user": ObjectId(user_id), 
@@ -357,7 +357,7 @@ def submit_all_answers():
     if matches:
       return jsonify({"matches": matches}), 200
     else:
-      return jsonify({"error": "No matches found"}), 404
+      return jsonify({"message": "No matches found"}), 200
     
 
 @app.route("/api/populate_db/<int:num_users>", methods=["POST"])
