@@ -6,6 +6,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from pymongo import MongoClient
 import numpy as np
+from itertools import chain
 
 load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
@@ -138,21 +139,30 @@ def find_matches(user_id: str):
 
   gender_answer = user_prefs[0]["answer"]
   location_answer = user_answers[1]["answer"]
-  budget_answer = user_prefs[0]["answer"]
+  budget_answer = user_answers[0]["answer"]
   
   filtering_constraints = {}
   filtering_constraints["Gender"] = {"$in":gender_answer }
-  filtering_constraints["Location"] = {"$in":location_answer }
-  filtering_constraints["Budget"] = {"$lte": 500, "$gte": budget_answer}
-
+  filtering_constraints["Budget"] = {"$gte": 500, "$lte": budget_answer}
+  print(filtering_constraints)
   #cleaning
   filtered_users = profiles.aggregate([
      {"$match": filtering_constraints},
-     {"$project": {"_id": 1,}}
+     {"$project": {"_id": 1,"Location": 1}}
   ])
 
-  filtered_users = [str(user["_id"]) for user in filtered_users]
+  #location cleaning
+  filtered_users = list(filtered_users)
+  filtered_users = [
+      user for user in filtered_users
+      if set(user.get("Location", [])) & set(location_answer)  # Check if the intersection is not empty
+  ]
 
+
+  # Now filtered_users contains only those users whose location answers intersect with the user's answers
+
+  filtered_users = [str(user["_id"]) for user in filtered_users]
+  print(filtered_users)
   compatibility_scores = {}
   for user in filtered_users:
     if user == user_id:
@@ -176,6 +186,7 @@ def find_matches(user_id: str):
 
   return sorted_profiles
 
+print(find_matches("67ba9c64cfb5831a02620707"))
 ## Populate DB with dummy data
 first_names = ["John", "Emma", "Sophia", "Liam", "Noah", "Aiden", "Olivia", "Ethan", "Mia", "James"]
 last_names = ["Smith", "Johnson", "Williams", "Brown", "Miller", "Davis", "Garcia", "Rodriguez", "Anderson"]
