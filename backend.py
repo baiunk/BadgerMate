@@ -83,9 +83,9 @@ def update_user_profile(user_id, responses):
     profile_collection.update_one(
         {"_id": ObjectId(user_id)},
         {"$set": {
-            "gender": gender,
-            "location": location,
-            "budget": budget
+            "Gender": gender,
+            "Location": location,
+            "Budget": budget
         }}
     )
 
