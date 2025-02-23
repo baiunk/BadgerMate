@@ -245,10 +245,15 @@ def new_user():
   for field in required_fields:
     if field not in data:
       return jsonify({"error": f"Missing required field: {field}"}), 400
+
+  # Check if the email already exists in the database
+  existing_user = profiles.find_one({"Email": data["Email"]})
+  if existing_user:
+    return jsonify({"error": "User already exists"}), 400
+
   data["top_10_matches"] = {}
   user_id = profiles.insert_one(data).inserted_id
   return jsonify({"user_id": str(user_id)}), 201
-  
 # Give all questions
 @app.route("/api/get_all_questions", methods=["GET"])
 def get_all_questions():
@@ -359,6 +364,13 @@ def submit_all_answers():
     else:
       return jsonify({"message": "No matches found"}), 200
     
+
+@app.route("/api/find_matches", methods=["POST"])
+def matchings_endpoint():
+   data = request.get_json()
+   user_id = data.get("userId")
+   matches = find_matches(user_id)
+   return jsonify({"matches": matches}), 200
 
 @app.route("/api/populate_db/<int:num_users>", methods=["POST"])
 def populate_db(num_users):
